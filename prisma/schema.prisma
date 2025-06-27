@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id                  String   @id @default(uuid())
+  bussiness_owner_id  String
+  store_name          String
+  phone_no            String
+  contact_person_name String
+  email               String  @unique
+  inventory_category  InventoryCategory
+  commission_type     CommissionType
+  commission_amount   Float
+  store_type          StoreType
+  min_order_amount    Int
+  store_category      String[]
+  open_for_order      Boolean
+  franchise_id        String?
+  hubs_list           String[]
+  is_vat_included     Boolean
+  active_coupon       String?
+  store_settings      String? @unique
+  operating_hour_start DateTime @default(now())
+  operating_hour_end   DateTime? 
+  meta                Json?
+  key_words           String?
+  resturant_status    ResturantStatus
+}
+
+enum InventoryCategory {
+  Inventory_contable
+  Inventory_not_countable
+}
+
+enum CommissionType {
+  percentage
+  flat
+}
+
+enum StoreType {
+  resturant
+  shop
+  grocery
+}
+
+enum ResturantStatus {
+  is_active
+  inactive
+  suspended
+  deal_closed
+}
