@@ -64,9 +64,7 @@ export class StoreService {
   }
 
   async search(phone: string|undefined, restaurantname: string|undefined){
-    if (phone === undefined && restaurantname === undefined){
-      throw new BadRequestException(HttpStatus.BAD_REQUEST)
-    }else if(phone !== undefined && restaurantname === undefined){
+    if(phone !== undefined && restaurantname === undefined){
       return this.prisma.store.findMany({
         where: {phone_no: phone}
       })
@@ -89,9 +87,7 @@ export class StoreService {
 
   async filter(availability: boolean|undefined, hub: string[]|undefined){
 
-    if( availability === undefined && hub === undefined){
-      throw new BadRequestException(HttpStatus.BAD_REQUEST)
-    }else if(availability !== undefined && hub === undefined){
+    if(availability !== undefined && hub === undefined){
       if (availability){
         return this.prisma.store.findMany({
           where: {resturant_status: "is_active"}

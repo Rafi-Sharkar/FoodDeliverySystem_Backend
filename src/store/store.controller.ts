@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseBoolPipe, ParseArrayPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query,  ParseArrayPipe} from '@nestjs/common';
 import { StoreService } from './store.service';
 import { CreateStoreDto, CreateStoreResponseDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { ApiBadRequestResponse, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { OptionalParseBoolPipe } from './pipe/optionalparseboolpipe.pipe';
 
 @Controller('store')
 export class StoreController {
@@ -17,11 +18,26 @@ export class StoreController {
   }
 
   @ApiOperation({summary: "Used to get all store data"})
+  @ApiQuery({name: "phone", required: false, type: String})
+  @ApiQuery({name: "restaurantname", required: false, type: String})
+  @ApiQuery({name: "availability", required: false, type: Boolean})
+  @ApiQuery({name: "hub", required: false, type: Array})
   @ApiResponse({status: 200, description: "Get all store data", type: CreateStoreDto})
   @Get()
-  findAll() {
-    console.log('Get All')
-    return this.storeService.findAll();
+  findAll(
+    @Query('phone') phone?: string|undefined,
+    @Query('restaurantname') restaurantname?:string|undefined,
+    @Query('availability', OptionalParseBoolPipe) availability?: boolean|undefined,
+    @Query('hub') hub?:string[]|undefined
+  ){
+    console.log(phone, restaurantname, availability, hub)
+    if(phone!==undefined && restaurantname!==undefined){
+      return this.storeService.search(phone, restaurantname)
+    }else if(availability!==undefined && hub!==undefined){
+      return this.storeService.filter(availability, hub)
+    }else if(phone===undefined && restaurantname===undefined && availability===undefined && hub===undefined){
+      return this.storeService.findAll()
+    }
   }
 
   @ApiOperation({summary: "Used to get specific store data"})
@@ -46,20 +62,4 @@ export class StoreController {
     return this.storeService.remove(id);
   }
 
-  @ApiOperation({summary: "Used for search store"})
-  @ApiQuery({name: "phone"})
-  @ApiQuery({name: 'restaurantname'})
-  @Get()
-  search(@Query('phone') phone?: string, @Query('restaurantname') restaurantname?:string ){
-    console.log(phone, restaurantname)
-    return this.storeService.search(phone, restaurantname)
-  }
-
-  @ApiQuery({name: "availability"})
-  @ApiQuery({name: 'hub'})
-  @Get()
-  filter(@Query('availability', ParseBoolPipe) availability?: boolean, @Query('hub',ParseArrayPipe) hub?:string[]|undefined){
-    console.log(availability, hub)  
-    return this.storeService.filter(availability, hub)
-  }
 }
